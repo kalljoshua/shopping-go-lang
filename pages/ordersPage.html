@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Orders List</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@material-ui/core@4.11.0/dist/material-ui.min.css"
+    />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f5f5f5;
+        font-family: "Roboto", sans-serif;
+      }
+      .mui-table {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+      }
+      .mui-btn {
+        margin-top: 20px;
+      }
+    </style>
+    <script>
+      fetch("/orders")
+        .then((response) => response.json())
+        .then((data) => {
+          const tableBody = document.querySelector("tbody");
+          data.forEach((order) => {
+            const row = document.createElement("tr");
+
+            const orderIdCell = document.createElement("td");
+            orderIdCell.textContent = order.id;
+            row.appendChild(orderIdCell);
+
+            const shoppingCartIdCell = document.createElement("td");
+            shoppingCartIdCell.textContent = order.shopping_cart_id;
+            row.appendChild(shoppingCartIdCell);
+
+            const customerProfileCell = document.createElement("td");
+            customerProfileCell.textContent = order.customer_profile;
+            row.appendChild(customerProfileCell);
+
+            const productLocationCell = document.createElement("td");
+            productLocationCell.textContent = order.product_location;
+            row.appendChild(productLocationCell);
+
+            tableBody.appendChild(row);
+          });
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    </script>
+  </head>
+  <body>
+    <div class="mui-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Shopping Cart ID</th>
+            <th>Customer Profile</th>
+            <th>Product Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Here you can add rows for each order -->
+        </tbody>
+      </table>
+      <button
+        class="mui-btn mui-btn--raised"
+        onclick="window.location.href='create_order.html'"
+      >
+        Create Order
+      </button>
+    </div>
+  </body>
+</html>

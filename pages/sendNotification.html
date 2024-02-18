@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Send Notification</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@material-ui/core@4.11.0/dist/material-ui.min.css"
+    />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f5f5f5;
+        font-family: "Roboto", sans-serif;
+      }
+      .mui-form {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+      }
+      .mui-btn {
+        margin-top: 20px;
+      }
+
+      .mui-textfield {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+      }
+
+      .mui-textfield input,
+      .mui-textfield textarea {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .mui-textfield label {
+        margin-bottom: 5px;
+      }
+
+      .mui-textfield textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+    </style>
+    <script>
+      function submitNotificationForm(event) {
+        event.preventDefault();
+        var notification = {
+          customer_id: document.getElementById("customer_id").value,
+          message: document.getElementById("message").value,
+        };
+        fetch("http://localhost:8080/notifications/receive", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(notification),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            alert("Notification sent successfully!");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while sending the notification.");
+          });
+      }
+    </script>
+  </head>
+  <body>
+    <form onsubmit="submitNotificationForm(event)" class="mui-form">
+      <div class="mui-textfield">
+        <input type="text" id="customer_id" name="customer_id" />
+        <label for="customer_id">Customer ID:</label>
+      </div>
+      <div class="mui-textfield">
+        <textarea id="message" name="message"></textarea>
+        <label for="message">Message:</label>
+      </div>
+      <button type="submit" class="mui-btn mui-btn--raised mui-form">
+        Send Notification
+      </button>
+    </form>
+  </body>
+</html>

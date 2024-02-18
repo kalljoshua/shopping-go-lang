@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Create Order</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@material-ui/core@4.11.0/dist/material-ui.min.css"
+    />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: 'Roboto', sans-serif;
+        }
+        .mui-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        }
+        .mui-btn {
+            margin-top: 20px;
+        }
+
+        .mui-textfield {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .mui-textfield input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .mui-textfield label {
+            margin-bottom: 5px;
+        }
+    </style>
+    <script>
+      function submitForm(event) {
+        event.preventDefault();
+        var order = {
+          shopping_cart_id: document.getElementById("shopping_cart_id").value,
+          customer_profile: document.getElementById("customer_profile").value,
+          product_location: document.getElementById("product_location").value,
+        };
+        fetch("http://localhost:8080/orders/" + uuidv4(), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(order),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            alert("Order submitted successfully!");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while submitting the order.");
+          });
+      }
+
+      function uuidv4() {
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+          (
+            c ^
+            (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+          ).toString(16)
+        );
+      }
+    </script>
+  </head>
+  <body>
+    
+    <form onsubmit="submitForm(event)" class="mui-form">
+      <div class="mui-textfield">
+        <input type="text" id="shopping_cart_id" name="shopping_cart_id" />
+        <label for="shopping_cart_id">Shopping Cart ID:</label>
+      </div>
+      <div class="mui-textfield">
+        <input type="text" id="customer_profile" name="customer_profile" />
+        <label for="customer_profile">Customer Profile:</label>
+      </div>
+      <div class="mui-textfield">
+        <input type="text" id="product_location" name="product_location" />
+        <label for="product_location">Product Location:</label>
+      </div>
+      <button type="submit" class="mui-btn mui-btn--raised mui-form">
+        Create Order
+      </button>
+      <a href="pages/ordersPage.html" class="mui-btn mui-btn--raised">Go to Orders Page</a>
+      <a href="pages/sendNotification.html" class="mui-btn mui-btn--raised">Go to Send Notification Page</a>
+    </form>
+  </body>
+</html>
