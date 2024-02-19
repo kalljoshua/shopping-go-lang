@@ -1,11 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"database/sql"
-	"encoding/json"
-	"fmt"
-	"github.com/NaySoftware/go-fcm"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
@@ -21,41 +17,11 @@ var db *sql.DB
 	ProductLocation string `json:"product_location,omitempty"`
 } */
 
-type Notification struct {
-	CustomerID string `json:"customer_id"`
-	Message    string `json:"message"`
-}
-
 type ShippingRequest struct {
 	OrderID    string `json:"order_id"`
 	CustomerID string `json:"customer_id"`
 }
 
-type NotificationRequest struct {
-	CustomerID string `json:"customer_id"`
-	Message    string `json:"message"`
-}
-
-//var orders []Order
-
-func notifyNotificationService(customerID, message string) error {
-	notificationRequest := &NotificationRequest{
-		CustomerID: customerID,
-		Message:    message,
-	}
-
-	requestBody, err := json.Marshal(notificationRequest)
-	if err != nil {
-		return err
-	}
-
-	_, err = http.Post("http://127.0.0.1:8080/notifications/send", "application/json", bytes.NewBuffer(requestBody))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 
 /* func GetOrderEndpoint(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
@@ -179,33 +145,6 @@ func CreateOrderEndpoint(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(orders)
 } */
 
-func ReceiveNotificationEndpoint(w http.ResponseWriter, req *http.Request) {
-	var notification Notification
-	_ = json.NewDecoder(req.Body).Decode(&notification)
-
-	// Send a push notification
-	var err error
-	data := make(map[string]string)
-	data["message"] = notification.Message
-	data["customer_id"] = notification.CustomerID
-
-	ids := []string{
-		"device token or registration id", // replace with the device token or registration id
-	}
-
-	client := fcm.NewFcmClient("YourServerKey")
-	client.NewFcmRegIdsMsg(ids, data)
-
-	status, err := client.Send()
-
-	if err == nil {
-		status.PrintResults()
-	} else {
-		fmt.Println(err)
-	}
-
-	json.NewEncoder(w).Encode(notification)
-}
 
 func main() {
 	var err error

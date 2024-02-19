@@ -1,55 +1,49 @@
 package main
 
-/* import (
-    "bytes"
+import (
     "encoding/json"
     "net/http"
 )
 
-type ShippingRequest struct {
-    OrderID    string `json:"order_id"`
+type Notification struct {
     CustomerID string `json:"customer_id"`
+    Message    string `json:"message"`
 }
 
 type NotificationRequest struct {
     CustomerID string `json:"customer_id"`
     Message    string `json:"message"`
-} */
+}
 
-/* func alertShippingService(orderID, customerID string) error {
-    shippingRequest := &ShippingRequest{
-        OrderID:    orderID,
-        CustomerID: customerID,
-    }
+func ReceiveNotificationEndpoint(w http.ResponseWriter, req *http.Request) {
+    var notificationRequest NotificationRequest
+    _ = json.NewDecoder(req.Body).Decode(&notificationRequest)
 
-    requestBody, err := json.Marshal(shippingRequest)
+    err := notifyNotificationService(notificationRequest.CustomerID, notificationRequest.Message)
     if err != nil {
-        return err
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
     }
 
-    _, err = http.Post("https://127.0.0.1:8080/api/shipping/receive", "application/json", bytes.NewBuffer(requestBody))
-    if err != nil {
-        return err
-    }
+    json.NewEncoder(w).Encode(notificationRequest)
+}
+
+func notifyNotificationService(customerID, message string) error {
+    // This is a placeholder for the actual implementation.
+    // You would typically use a library or service like Firebase Cloud Messaging (FCM) to send the notification.
+    // Here's an example of how you might do it with FCM:
+
+    // data := map[string]string{
+    // 	"customer_id": customerID,
+    // 	"message":     message,
+    // }
+
+    // _, err := fcm.Send(fcm.Message{
+    // 	To:   "/topics/all", // send to all devices subscribed to the "all" topic
+    // 	Data: data,
+    // })
+
+    // return err
 
     return nil
-} */
-
-/* func notifyNotificationService(customerID, message string) error {
-    notificationRequest := &NotificationRequest{
-        CustomerID: customerID,
-        Message:    message,
-    }
-
-    requestBody, err := json.Marshal(notificationRequest)
-    if err != nil {
-        return err
-    }
-
-    _, err = http.Post("https://127.0.0.1:8081/notifications/send", "application/json", bytes.NewBuffer(requestBody))
-    if err != nil {
-        return err
-    }
-
-    return nil
-} */
+}
