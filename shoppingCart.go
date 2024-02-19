@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/NaySoftware/go-fcm"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
@@ -15,12 +14,12 @@ import (
 
 var db *sql.DB
 
-type Order struct {
+/* type Order struct {
 	ID              string `json:"id,omitempty"`
 	ShoppingCartID  string `json:"shopping_cart_id,omitempty"`
 	CustomerProfile string `json:"customer_profile,omitempty"`
 	ProductLocation string `json:"product_location,omitempty"`
-}
+} */
 
 type Notification struct {
 	CustomerID string `json:"customer_id"`
@@ -37,7 +36,7 @@ type NotificationRequest struct {
 	Message    string `json:"message"`
 }
 
-var orders []Order
+//var orders []Order
 
 func notifyNotificationService(customerID, message string) error {
 	notificationRequest := &NotificationRequest{
@@ -58,7 +57,7 @@ func notifyNotificationService(customerID, message string) error {
 	return nil
 }
 
-func GetOrderEndpoint(w http.ResponseWriter, req *http.Request) {
+/* func GetOrderEndpoint(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	var order Order
 
@@ -105,9 +104,9 @@ func CreateOrderEndpoint(w http.ResponseWriter, req *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(order)
-}
+} */
 
-func GetAllOrdersEndpoint(w http.ResponseWriter, req *http.Request) {
+/* func GetAllOrdersEndpoint(w http.ResponseWriter, req *http.Request) {
 	rows, err := db.Query("select id, shopping_cart_id, customer_profile, product_location from orders")
 	if err != nil {
 		log.Fatal(err)
@@ -129,9 +128,9 @@ func GetAllOrdersEndpoint(w http.ResponseWriter, req *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(orders)
-}
+} */
 
-func DeleteOrderEndpoint(w http.ResponseWriter, req *http.Request) {
+/* func DeleteOrderEndpoint(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	var deletedOrder Order
 
@@ -178,7 +177,7 @@ func DeleteOrderEndpoint(w http.ResponseWriter, req *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(orders)
-}
+} */
 
 func ReceiveNotificationEndpoint(w http.ResponseWriter, req *http.Request) {
 	var notification Notification
@@ -217,24 +216,29 @@ func main() {
 	defer db.Close()
 
 	sqlStmt := `
-    create table if not exists orders (id text not null primary key, shopping_cart_id text, customer_profile text, product_location text);
-    `
+		    create table if not exists orders (id text not null primary key, shopping_cart_id text, customer_profile text, product_location text);
+		    `
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		log.Fatalf("%q: %s\n", err, sqlStmt)
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/orders/{id}", GetOrderEndpoint).Methods("GET")
-	router.HandleFunc("/orders/{id}", CreateOrderEndpoint).Methods("POST")
-	router.HandleFunc("/orders/{id}", DeleteOrderEndpoint).Methods("DELETE")
-	router.HandleFunc("/orders", GetAllOrdersEndpoint).Methods("GET")
+	router.HandleFunc("/orders/{id}", func(w http.ResponseWriter, req *http.Request) {
+		GetOrderEndpoint(db, w, req)
+	}).Methods("GET")
+	router.HandleFunc("/orders/{id}", func(w http.ResponseWriter, req *http.Request) {
+		DeleteOrderEndpoint(db, w, req)
+	}).Methods("DELETE")
+	router.HandleFunc("/orders/{id}", func(w http.ResponseWriter, req *http.Request) {
+		CreateOrderEndpoint(db, w, req) // Fix: Pass db as the first argument
+	}).Methods("POST")
+	router.HandleFunc("/orders", func(w http.ResponseWriter, req *http.Request) {
+		GetAllOrdersEndpoint(db, w, req)
+	}).Methods("GET")
 	router.HandleFunc("/notifications/receive", ReceiveNotificationEndpoint).Methods("POST")
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "index.html")
-	})
-	router.HandleFunc("/ordersPage", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "ordersPage.html")
+		http.ServeFile(w, r, "pages/ordersPage.html")
 	})
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
